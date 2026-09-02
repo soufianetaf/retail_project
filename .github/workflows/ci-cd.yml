@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [develop, staging, main]
+  push:
+    branches: [develop, staging, main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check . && black --check .
+      - run: pytest tests/unit --cov=src
+
+  validate:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle validate -t dev
+
+  deploy:
+    needs: validate
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - run: |
+          TARGET=${{ github.ref_name == 'develop' && 'dev' || github.ref_name }}
+          databricks bundle deploy -t $TARGET

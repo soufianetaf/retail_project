@@ -1,0 +1,11 @@
+resources:
+  pipelines:
+    bronze_silver_pipeline:
+      name: retail_bronze_silver_${bundle.target}
+      catalog: ${var.catalog}
+      target: silver
+      libraries:
+        - notebook: {path: ../src/bronze/ingest_orders.py}   
+        - notebook: {path: ../src/silver/clean_orders.py}    
+      configuration:
+        landing_path: ${var.landing_path}

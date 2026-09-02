@@ -1,0 +1,40 @@
+bundle:
+  name: retail_pipeline
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    default: true
+    workspace:
+      profile: dev
+      root_path: /Workspace/retail_pipeline/dev
+    variables:
+      catalog: dev
+      landing_path: /Volumes/dev/raw/landing_zone
+
+  staging:
+    workspace:
+      profile: staging
+      root_path: /Workspace/retail_pipeline/staging
+    variables:
+      catalog: staging
+      landing_path: /Volumes/staging/raw/landing_zone
+
+  prod:
+    mode: production
+    workspace:
+      profile: prod
+      root_path: /Workspace/retail_pipeline/prod
+    variables:
+      catalog: prod
+      landing_path: /Volumes/prod/raw/landing_zone
+    run_as:
+      service_principal_name: sp-pipeline-prod
+
+variables:
+  catalog:
+    description: Catalogue Unity Catalog cible
+  landing_path:
+    description: Chemin de la zone d'atterrissage

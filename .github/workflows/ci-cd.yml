@@ -6,6 +6,10 @@ on:
   push:
     branches: [develop, staging, main]
 
+env:
+  DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
 jobs:
   quality:
     runs-on: ubuntu-latest

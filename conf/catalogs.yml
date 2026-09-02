@@ -1,0 +1,2 @@
+schemas: [raw, bronze, silver, gold]
+catalogs: [dev, staging, prod]

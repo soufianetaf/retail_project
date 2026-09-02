@@ -4,12 +4,16 @@ resources:
       name: retail_gold_${bundle.target}
       tasks:
         - task_key: run_pipeline
-          pipeline_task: {pipeline_id: ${resources.pipelines.bronze_silver_pipeline.id}}
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.bronze_silver_pipeline.id}
         - task_key: build_gold
-          depends_on: [{task_key: run_pipeline}]
-          notebook_task: {notebook_path: ../src/gold/sales_aggregates.py}   
+          depends_on:
+            - task_key: run_pipeline
+          notebook_task:
+            notebook_path: ../src/gold/sales_aggregates.py
       schedule:
         quartz_cron_expression: "0 0 7 * * ?"
         timezone_id: Europe/Paris
       email_notifications:
-        on_failure: ["tafahisoufiane9@gmail.com"]
+        on_failure:
+          - "tafahisoufiane9@gmail.com"

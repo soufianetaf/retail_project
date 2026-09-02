@@ -4,8 +4,11 @@ resources:
       name: retail_bronze_silver_${bundle.target}
       catalog: ${var.catalog}
       target: silver
+      serverless: true
       libraries:
-        - notebook: {path: ../src/bronze/ingest_orders.py}   
-        - notebook: {path: ../src/silver/clean_orders.py}    
+        - notebook:
+            path: ../src/bronze/ingest_orders.py
+        - notebook:
+            path: ../src/silver/clean_orders.py
       configuration:
         landing_path: ${var.landing_path}

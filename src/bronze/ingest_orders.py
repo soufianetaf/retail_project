@@ -1,6 +1,6 @@
 # Databricks notebook source
 import dlt
-from pyspark.sql.functions import col,current_timestamp
+from pyspark.sql.functions import col, current_timestamp
 
 # 1. On récupère le chemin dynamique
 landing_path = spark.conf.get("landing_path")

@@ -19,7 +19,9 @@ resources:
             - task_key: run_silver
           notebook_task:
             notebook_path: ../src/gold/sales_aggregates.py
-          
+            base_parameters:
+              catalog_name: ${var.catalog}
+              
       schedule:
         quartz_cron_expression: "0 0 7 * * ?"
         timezone_id: Europe/Paris

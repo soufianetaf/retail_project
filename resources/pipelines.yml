@@ -18,6 +18,6 @@ resources:
       serverless: true
       libraries:
         - notebook:
-            path: ../src/silver/clean_orders.py
+            path: ../src/silver/clean_all.py
       configuration:
         catalog_name: ${var.catalog}

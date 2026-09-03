@@ -4,35 +4,22 @@ resources:
       name: retail_gold_${bundle.target}
       
       tasks:
-        # 1. Lancement de la couche Bronze
         - task_key: run_bronze
           pipeline_task:
             pipeline_id: ${resources.pipelines.bronze_pipeline.id}
             
-        # 2. Lancement de la couche Silver (attend que Bronze soit fini)
         - task_key: run_silver
           depends_on:
             - task_key: run_bronze
           pipeline_task:
             pipeline_id: ${resources.pipelines.silver_pipeline.id}
             
-        # 3. Lancement de la couche Gold (attend que Silver soit fini)
         - task_key: build_gold
           depends_on:
             - task_key: run_silver
           notebook_task:
             notebook_path: ../src/gold/sales_aggregates.py
-          job_cluster_key: job_cluster
           
-      # Définition du cluster (machine) pour exécuter le script Gold
-      job_clusters:
-        - job_cluster_key: job_cluster
-          new_cluster:
-            spark_version: 13.3.x-scala2.12
-            node_type_id: Standard_DS3_v2
-            num_workers: 1
-            
-      # Planification automatique (tous les jours à 7h00)
       schedule:
         quartz_cron_expression: "0 0 7 * * ?"
         timezone_id: Europe/Paris

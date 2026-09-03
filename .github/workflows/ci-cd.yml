@@ -37,4 +37,4 @@ jobs:
       - uses: databricks/setup-cli@main
       - run: |
           TARGET=${{ github.ref_name == 'develop' && 'dev' || github.ref_name }}
-          databricks bundle deploy -t $TARGET
+          databricks bundle deploy -t $TARGET --auto-approve

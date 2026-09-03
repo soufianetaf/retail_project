@@ -7,7 +7,7 @@ resources:
       serverless: true
       libraries:
         - notebook:
-            path: ../src/bronze/ingest_orders.py
+            path: ../src/bronze/ingest_all.py
       configuration:
         landing_path: ${var.landing_path}
 

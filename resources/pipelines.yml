@@ -1,14 +1,23 @@
 resources:
   pipelines:
-    bronze_silver_pipeline:
-      name: retail_bronze_silver_${bundle.target}
+    bronze_pipeline:
+      name: retail_bronze_${bundle.target}
+      catalog: ${var.catalog}
+      target: bronze
+      serverless: true
+      libraries:
+        - notebook:
+            path: ../src/bronze/ingest_orders.py
+      configuration:
+        landing_path: ${var.landing_path}
+
+    silver_pipeline:
+      name: retail_silver_${bundle.target}
       catalog: ${var.catalog}
       target: silver
       serverless: true
       libraries:
         - notebook:
-            path: ../src/bronze/ingest_orders.py
-        - notebook:
             path: ../src/silver/clean_orders.py
       configuration:
-        landing_path: ${var.landing_path}
+        catalog_name: ${var.catalog}

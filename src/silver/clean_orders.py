@@ -15,6 +15,9 @@ from pyspark.sql.functions import (
 # Objectif : Nettoyage, typage strict, et validation des données brutes.
 # ==============================================================================
 
+catalog = spark.conf.get("dev")
+
+
 # Règle métier : Liste officielle des statuts de commande acceptés
 VALID_STATUSES = [
     "DELIVERED",
@@ -51,7 +54,7 @@ def silver_orders_clean():
     """
 
     # Lecture du flux Bronze
-    df = dlt.read("bronze_orders")
+    df = spark.readStream.table(f"{catalog}.bronze.bronze_orders")
 
     # 2. TRANSFORMATIONS ET TYPAGE
     df_cleaned = (

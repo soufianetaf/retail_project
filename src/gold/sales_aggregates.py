@@ -1,33 +1,56 @@
 # Databricks notebook source
-from pyspark.sql.functions import col, count, to_date
+import dlt
+from pyspark.sql.functions import sum as _sum
 
-# ==============================================================================
-# COUCHE GOLD : Agrégations Métier
-# ==============================================================================
+catalog = spark.conf.get("catalog_name")
 
-# 1. On récupère le paramètre dynamique (dev/prod) envoyé par le Job
-dbutils.widgets.text("catalog_name", "dev")  # 'dev' par défaut si lancé à la main
-catalog = dbutils.widgets.get("catalog_name")
 
-# 2. Lecture de la table Silver
-df_silver = spark.table(f"{catalog}.silver.silver_orders")
-
-# 3. Calculs Métier (Agrégations) : Nombre de commandes par jour et par statut
-df_gold = (
-    df_silver
-    # On extrait juste la date (sans l'heure)
-    .withColumn("order_day", to_date(col("order_purchase_timestamp")))
-    # On regroupe par date et par statut
-    .groupBy("order_day", "order_status")
-    # On compte le nombre de commandes
-    .agg(count("order_id").alias("total_orders"))
+# =====================================================================================
+# 1. DIMENSION : CUSTOMERS
+# =====================================================================================
+@dlt.table(
+    name="dim_customers",
+    comment="Dimension Clients (Materialized View)",
+    table_properties={"quality": "gold"},
 )
+def dim_customers():
+    # Lecture classique (sans readStream) = Création d'une Materialized View
+    return spark.table(f"{catalog}.silver.silver_customers")
 
-# 4. Sauvegarde dans le schéma Gold (Écrasement quotidien)
-(
-    df_gold.write.mode("overwrite")
-    .option("mergeSchema", "true")
-    .saveAsTable(f"{catalog}.gold.daily_order_stats")
+
+# =====================================================================================
+# 2. DIMENSION : PRODUCTS
+# =====================================================================================
+@dlt.table(
+    name="dim_products",
+    comment="Dimension Produits avec traductions (Materialized View)",
+    table_properties={"quality": "gold"},
 )
+def dim_products():
+    df_products = spark.table(f"{catalog}.silver.silver_products")
+    df_translation = spark.table(f"{catalog}.silver.silver_category_translation")
+    return df_products.join(df_translation, on="product_category_name", how="left")
 
-print(f"Table Gold mise à jour avec succès dans {catalog}.gold.daily_order_stats !")
+
+# =====================================================================================
+# 3. FACT : SALES
+# =====================================================================================
+@dlt.table(
+    name="fact_sales",
+    comment="Table des faits des Ventes (Materialized View)",
+    table_properties={"quality": "gold"},
+)
+def fact_sales():
+    df_orders = spark.table(f"{catalog}.silver.silver_orders")
+    df_items = spark.table(f"{catalog}.silver.silver_order_items")
+    df_payments = spark.table(f"{catalog}.silver.silver_order_payments")
+
+    # Agrégation des paiements par commande
+    df_payments_agg = df_payments.groupBy("order_id").agg(
+        _sum("payment_value").alias("total_paid")
+    )
+
+    # Jointure finale pour la table des faits
+    return df_items.join(df_orders, on="order_id", how="inner").join(
+        df_payments_agg, on="order_id", how="left"
+    )

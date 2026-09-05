@@ -21,3 +21,13 @@ resources:
             path: ../src/silver/clean_all.py
       configuration:
         catalog_name: ${var.catalog}
+    gold_pipeline:
+      name: retail_gold_${bundle.target}
+      catalog: ${var.catalog}
+      target: gold
+      serverless: true
+      libraries:
+        - notebook:
+            path: ../src/gold/sales_aggregates.py
+      configuration:
+        catalog_name: ${var.catalog}

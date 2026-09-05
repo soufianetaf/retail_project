@@ -1,7 +1,7 @@
 resources:
   jobs:
     gold_aggregation_job:
-      name: retail_gold_${bundle.target}
+      name: retail_gold_job_${bundle.target}
       
       tasks:
         - task_key: run_bronze
@@ -17,11 +17,9 @@ resources:
         - task_key: build_gold
           depends_on:
             - task_key: run_silver
-          notebook_task:
-            notebook_path: ../src/gold/sales_aggregates.py
-            base_parameters:
-              catalog_name: ${var.catalog}
-              
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.gold_pipeline.id}
+            
       schedule:
         quartz_cron_expression: "0 0 7 * * ?"
         timezone_id: Europe/Paris

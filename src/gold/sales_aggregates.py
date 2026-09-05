@@ -14,7 +14,6 @@ catalog = spark.conf.get("catalog_name")
     table_properties={"quality": "gold"},
 )
 def dim_customers():
-    # Lecture classique (sans readStream) = Création d'une Materialized View
     return spark.table(f"{catalog}.silver.silver_customers")
 
 
@@ -28,7 +27,12 @@ def dim_customers():
 )
 def dim_products():
     df_products = spark.table(f"{catalog}.silver.silver_products")
-    df_translation = spark.table(f"{catalog}.silver.silver_category_translation")
+
+    # CORRECTION : On ne prend QUE les deux colonnes utiles de la traduction
+    df_translation = spark.table(
+        f"{catalog}.silver.silver_category_translation"
+    ).select("product_category_name", "product_category_name_english")
+
     return df_products.join(df_translation, on="product_category_name", how="left")
 
 
@@ -41,16 +45,18 @@ def dim_products():
     table_properties={"quality": "gold"},
 )
 def fact_sales():
-    df_orders = spark.table(f"{catalog}.silver.silver_orders")
     df_items = spark.table(f"{catalog}.silver.silver_order_items")
-    df_payments = spark.table(f"{catalog}.silver.silver_order_payments")
 
-    # Agrégation des paiements par commande
+    # CORRECTION : On ne prend que les informations métier de la commande (pour éviter de dupliquer les colonnes techniques)
+    df_orders = spark.table(f"{catalog}.silver.silver_orders").select(
+        "order_id", "customer_id", "order_status", "order_purchase_timestamp"
+    )
+
+    df_payments = spark.table(f"{catalog}.silver.silver_order_payments")
     df_payments_agg = df_payments.groupBy("order_id").agg(
         _sum("payment_value").alias("total_paid")
     )
 
-    # Jointure finale pour la table des faits
     return df_items.join(df_orders, on="order_id", how="inner").join(
         df_payments_agg, on="order_id", how="left"
     )

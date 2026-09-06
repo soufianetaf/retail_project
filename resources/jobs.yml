@@ -19,14 +19,15 @@ resources:
             - task_key: run_silver
           pipeline_task:
             pipeline_id: ${resources.pipelines.gold_pipeline.id}
-                - task_key: validate_data
+            
+        - task_key: validate_data
           depends_on:
             - task_key: build_gold
           notebook_task:
             notebook_path: ../tests/integration/validate_gold.py
             base_parameters:
               catalog_name: ${var.catalog}
-            
+              
       schedule:
         quartz_cron_expression: "0 0 7 * * ?"
         timezone_id: Europe/Paris

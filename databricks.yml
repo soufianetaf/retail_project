@@ -30,8 +30,7 @@ targets:
     variables:
       catalog: prod
       landing_path: /Volumes/prod/raw/landing_zone
-    run_as:
-      service_principal_name: sp-pipeline-prod
+    
 
 variables:
   catalog:

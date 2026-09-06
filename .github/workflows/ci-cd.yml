@@ -35,6 +35,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
-      - run: |
-          TARGET=${{ github.ref_name == 'develop' && 'dev' || github.ref_name }}
-          databricks bundle deploy -t $TARGET --auto-approve
+      - name: Deploy to Databricks
+        run: |
+          # On récupère le nom de la branche
+          TARGET_ENV=${GITHUB_REF#refs/heads/}
+          
+          # Si la branche est 'main', la cible est 'prod'
+          if [ "$TARGET_ENV" == "main" ]; then
+            TARGET_ENV="prod"
+          fi
+          
+          # Si la branche est 'develop', la cible est 'dev' (au cas où)
+          if [ "$TARGET_ENV" == "develop" ]; then
+            TARGET_ENV="dev"
+          fi
+          
+          echo "Déploiement sur l'environnement : $TARGET_ENV"
+          databricks bundle deploy -t $TARGET_ENV --auto-approve

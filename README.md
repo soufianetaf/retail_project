@@ -67,4 +67,6 @@ This repository relies on a robust GitHub Actions workflow to ensure code qualit
 ├── databricks.yml       # DABs project configuration and targets
 ├── requirements-dev.txt # Python dependencies for local testing and CI
 └── pyproject.toml       # Linter and formatter configurations
+```
+## Architecture
 <img width="1376" height="768" alt="enterprise_detailed_architecture_1788711632922" src="https://github.com/user-attachments/assets/a917da41-9e98-4ea8-8740-8f525e252519" />
